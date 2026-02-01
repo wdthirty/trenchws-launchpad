@@ -1,0 +1,1 @@
+export { QuickBuyCard } from './QuickBuyCard';

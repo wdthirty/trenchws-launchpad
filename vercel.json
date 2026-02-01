@@ -1,0 +1,13 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/trigger-bonding-check",
+      "schedule": "0 2 * * *"
+    }
+  ],
+  "functions": {
+    "src/pages/api/create-coin-with-config.ts": {
+      "maxDuration": 300
+    }
+  }
+}

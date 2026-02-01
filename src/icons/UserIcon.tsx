@@ -1,0 +1,9 @@
+import React from 'react';
+import { IconProps } from './types';
+
+const UserIcon: React.FC<IconProps> = ({ width = 12, height = 12, ...props }) => {
+  return (
+<svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 48 48" width={width} height={height} fill="#FDE047"><path d="M24 4A10 10 0 1024 24 10 10 0 1024 4zM36.021 28H11.979C9.785 28 8 29.785 8 31.979V33.5c0 3.312 1.885 6.176 5.307 8.063C16.154 43.135 19.952 44 24 44c7.706 0 16-3.286 16-10.5v-1.521C40 29.785 38.215 28 36.021 28z"/></svg>  );
+};
+
+export default UserIcon;
