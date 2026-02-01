@@ -1,6 +1,6 @@
 # trenchws-launchpad
 
-A decentralized token launchpad built on Solana, powered by Meteora's Dynamic Bonding Curve (DBC) protocol. Users can create, discover, and trade tokens with automatic graduation to Meteora's AMM when the bonding curve threshold is reached.
+A Solana token launchpad powered by Meteora's Dynamic Bonding Curve. Create coins, trade them on the curve, and watch them graduate to Meteora's AMM once the bonding curve fills up.
 
 ---
 
@@ -26,9 +26,9 @@ A decentralized token launchpad built on Solana, powered by Meteora's Dynamic Bo
 
 ## Overview
 
-trenchws-launchpad is a full-stack Web3 application that enables permissionless token creation with automatic bonding curve mechanics. Tokens launch on a Dynamic Bonding Curve and, once a migration threshold is hit, automatically graduate to a full Meteora CPAMM liquidity pool for open market trading.
+trenchws-launchpad is the frontend and backend for a token launchpad on Solana. Anyone can create a coin — it starts on a bonding curve, and once enough liquidity builds up it automatically migrates to a real Meteora AMM pool.
 
-The platform aggregates real-time market data via Jupiter's WebSocket stream, provides TradingView-powered charts, and supports cross-chain bridging through LI.FI.
+The app pulls real-time data from Jupiter's WebSocket stream, has TradingView charts, and includes a cross-chain bridge via LI.FI so users can bring funds in from other chains.
 
 ---
 
@@ -90,56 +90,41 @@ The platform aggregates real-time market data via Jupiter's WebSocket stream, pr
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────┐
-│                   Frontend                       │
-│  Next.js Pages ─ React 19 ─ Tailwind ─ Jotai   │
-│                                                  │
-│  Contexts:                                       │
-│  ┌──────────┐ ┌──────────┐ ┌───────────────┐   │
-│  │UserProv. │ │DataStream│ │ ExploreProv.  │   │
-│  │(Auth/    │ │(WebSocket│ │ (Filters/     │   │
-│  │ Wallet)  │ │ Stream)  │ │  Tabs/Search) │   │
-│  └──────────┘ └──────────┘ └───────────────┘   │
-│  ┌──────────┐ ┌──────────┐ ┌───────────────┐   │
-│  │TradeProv.│ │SolPrice  │ │ TokenChart    │   │
-│  │(Swap UI) │ │Provider  │ │ Provider      │   │
-│  └──────────┘ └──────────┘ └───────────────┘   │
-└───────────────────┬─────────────────────────────┘
-                    │
-          ┌─────────┴──────────┐
-          ▼                    ▼
-┌──────────────────┐  ┌───────────────────┐
-│  API Routes      │  │  WebSocket Stream  │
-│  (Next.js API)   │  │  (Jupiter Trench)  │
-│                  │  │                    │
-│  /api/create-coin│  │  wss://trench-     │
-│  /api/trade      │  │  stream.jup.ag/ws  │
-│  /api/rewards    │  │                    │
-│  /api/swap       │  │  Subscriptions:    │
-│  /api/positions  │  │  - recent coins    │
-│  /api/auth       │  │  - pool updates    │
-│  /api/token      │  │  - transactions    │
-└───────┬──────────┘  └───────────────────┘
-        │
-        ▼
-┌───────────────────────────────────────────┐
-│              Services Layer                │
-│                                            │
-│  Coin Creation ─ Trade Confirm ─ Rewards  │
-│  Cache Warmup ─ Top Coins ─ Fee Calc     │
-│  Transaction Builder ─ Auth Interceptor   │
-└───────┬───────────┬───────────┬───────────┘
-        │           │           │
-        ▼           ▼           ▼
-┌────────────┐ ┌─────────┐ ┌─────────────┐
-│ PostgreSQL │ │ Upstash │ │   Solana     │
-│            │ │ Redis   │ │  (Helius)    │
-│ Users      │ │         │ │              │
-│ Coins      │ │ Quotes  │ │ DBC Pools    │
-│ Positions  │ │ Top     │ │ CPAMM Pools  │
-│ Configs    │ │ Coins   │ │ SPL Tokens   │
-│ Claims     │ │ Cache   │ │ Transactions │
-└────────────┘ └─────────┘ └─────────────┘
+Frontend (Next.js Pages / React 19 / Tailwind / Jotai)
+│
+│  Contexts:
+│  UserProvider ── DataStreamProvider ── ExploreProvider
+│  TradeProvider ── SolPriceProvider ── TokenChartProvider
+│
+├──────────────────────┬──────────────────────────┐
+│                      │                          │
+▼                      ▼                          ▼
+API Routes             WebSocket Stream           Jupiter Ultra API
+(Next.js Serverless)   (Jupiter Trench)           (Swap Quotes)
+                       wss://trench-stream.
+/api/create-coin       jup.ag/ws
+/api/trade
+/api/rewards           Channels:
+/api/swap              - recent coins
+/api/positions         - pool updates
+/api/auth              - transactions
+/api/token
+│
+▼
+Services Layer
+Coin Creation ── Trade Confirm ── Rewards
+Cache Warmup ── Top Coins ── Fee Calc
+Transaction Builder ── Auth Interceptor
+│
+├──────────────────┬──────────────────┐
+│                  │                  │
+▼                  ▼                  ▼
+PostgreSQL         Upstash Redis      Solana (Helius)
+- Users            - Quotes           - DBC Pools
+- Coins            - Top Coins        - CPAMM Pools
+- Positions        - Cache            - SPL Tokens
+- Configs                             - Transactions
+- Claims
 ```
 
 ---
