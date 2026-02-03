@@ -1,5 +1,7 @@
 # trenchws-launchpad
 
+> Fork of [Meteora Invent](https://github.com/MeteoraAg/meteora-invent)
+
 A Solana token launchpad powered by Meteora's Dynamic Bonding Curve. Create coins, trade them on the curve, and watch them graduate to Meteora's AMM once the bonding curve fills up.
 
 ---
